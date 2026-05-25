@@ -4,6 +4,8 @@ const pageURL = 'https://demo.playwright.dev/todomvc/#/'
 
 test('T1: Add tasks',{tag : ['@add']},async ({ page }) => {
   await page.goto(pageURL);
+  expect(await page.title()).toBeTruthy;
+
 
   //Locator 1. getByrole
   await expect(page.getByRole('heading', {name: 'todos'})).toBeVisible(); 
@@ -62,9 +64,30 @@ test('T2: Complete tasks',{tag : ['@complete']},async ({ page }) => {
   await expect(page.getByText('Completed task')).not.toBeVisible();
 });
 
-// test('t4', async ({ page }) => {
-//   await page.goto(' https://demo.playwright.dev/todomvc/#/');
-// });
+test('T3: Edit tasks',{tag : ['@edit']},async ({ page }) => {
+  test.fixme(false, 'Issue: false fixme test probe'); 
+  await page.goto(pageURL);
+  expect (page.url()).toContain('todomvc');
+
+  //Insert a task
+  const text = page.getByPlaceholder('What needs to be done?');
+  await text.fill('This is the original third test'); //Original text
+  await text.press('Enter');
+
+  //Edit this task
+  const textField = page.getByText('This is the original third test');
+  await expect(textField).toBeEditable;
+  await textField.dblclick();
+  
+  //This field will be changed 
+  const inputField = page.getByLabel('Edit');
+  await expect(inputField).toBeVisible;
+  await inputField.fill('This task was edited'); //Edited test
+  await inputField.press('Enter');
+
+  //The original text should not be visible since it was changed.
+  await expect(page.getByText('This is the original third test')).not.toBeVisible();
+});
 
 // test('t5', async ({ page }) => {
 //   await page.goto(' https://demo.playwright.dev/todomvc/#/');
