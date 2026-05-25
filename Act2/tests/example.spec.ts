@@ -76,13 +76,14 @@ test('T3: Edit tasks',{tag : ['@edit']},async ({ page }) => {
 
   //Edit this task
   const textField = page.getByText('This is the original third test');
-  await expect(textField).toBeEditable();
   // Double click to edit
   await textField.dblclick(); 
-  
-  //This field will be changed 
-  const inputField = page.getByLabel('Edit');
+
+  //This field will be changed
+  const inputField = page.locator('input.edit');
+  await expect(inputField).toBeEditable();
   await expect(inputField).toBeVisible();
+  
   await inputField.fill('This task was edited'); //Edited test
   await inputField.press('Enter');
 
@@ -110,3 +111,30 @@ test('T4: Delete tasks',{tag : ['@delete']},async ({ page }) => {
   await expect(page.getByText('Delete this test')).not.toBeVisible();
 });
 
+test('T5: Clear completed tasks',{tag : ['@clear']},async ({ page }) => {
+  await page.goto(pageURL);
+  await expect(page).toHaveTitle(/TodoMVC/);
+  const text = page.getByPlaceholder('What needs to be done?');
+
+  //Insert two tasks
+  await text.fill('Clear 1');
+  await text.press('Enter');
+
+  await text.fill('Clear 2');
+  await text.press('Enter');
+  //Complete the tasks
+  await page.getByLabel('Toggle Todo').nth(0).check();
+  await page.getByLabel('Toggle Todo').nth(1).check();
+  
+  await expect(page.locator('li.completed')).toHaveCount(2);
+  await expect.soft(page.getByTestId('todo-count')).toContainText('0');
+
+  //Clear
+  const clear = page.getByRole('button', { name: 'Clear completed' });
+  await expect(clear).toBeVisible();
+  await clear.click();
+
+  //There shouldn't be any tasks in the todo items
+  await expect(page.getByTestId('todo-item')).toHaveCount(0);
+  await expect(clear).not.toBeVisible();
+});
