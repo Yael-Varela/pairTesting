@@ -4,7 +4,7 @@ const pageURL = 'https://demo.playwright.dev/todomvc/#/'
 
 test('T1: Add tasks',{tag : ['@add']},async ({ page }) => {
   await page.goto(pageURL);
-  expect(await page.title()).toBeTruthy;
+  expect(await page.title()).toBeTruthy();
 
 
   //Locator 1. getByrole
@@ -76,12 +76,13 @@ test('T3: Edit tasks',{tag : ['@edit']},async ({ page }) => {
 
   //Edit this task
   const textField = page.getByText('This is the original third test');
-  await expect(textField).toBeEditable;
-  await textField.dblclick();
+  await expect(textField).toBeEditable();
+  // Double click to edit
+  await textField.dblclick(); 
   
   //This field will be changed 
   const inputField = page.getByLabel('Edit');
-  await expect(inputField).toBeVisible;
+  await expect(inputField).toBeVisible();
   await inputField.fill('This task was edited'); //Edited test
   await inputField.press('Enter');
 
@@ -89,6 +90,23 @@ test('T3: Edit tasks',{tag : ['@edit']},async ({ page }) => {
   await expect(page.getByText('This is the original third test')).not.toBeVisible();
 });
 
-// test('t5', async ({ page }) => {
-//   await page.goto(' https://demo.playwright.dev/todomvc/#/');
-// });
+test('T4: Delete tasks',{tag : ['@delete']},async ({ page }) => {
+  test.fixme(false, 'Issue: false fixme test probe'); 
+  await page.goto(pageURL);
+  //Insert a task
+  const text = page.getByPlaceholder('What needs to be done?');
+  await text.fill('Delete this test');
+  await text.press('Enter');
+  const item = page.getByTestId('todo-item').first();
+  await expect(item.getByTestId('todo-title')).toHaveText('Delete this test');
+
+  //To delete an item it's needed to hover over it, since it will reveal the destroy button.
+  await item.hover();
+  //Delete
+  await item.getByRole('button', {name: 'Delete'}).click();
+
+  //Verification of a correct deletion
+  await expect.soft(page.getByTestId('todo-item')).toHaveCount(0);
+  await expect(page.getByText('Delete this test')).not.toBeVisible();
+});
+
